@@ -25,16 +25,23 @@ signupForm.addEventListener('submit', function (event) {
 
     createUserWithEmailAndPassword(auth, email, password)
         .then((cred) => {
-            console.log(cred);
             // Enregistrer l'utilisateur dans Firestore
             const userRef = collection(db, 'users');
             addDoc(userRef, {
                 email: email,
                 password: password
             })
-                .then(() => {
-                    console.log('Utilisateur enregistré avec succès');
-                })
+            .then(() => {
+                console.log('Utilisateur enregistré avec succès');
+                // Rediriger vers la page d'accueil
+                window.location.href = 'index.html';
+                // Afficher un message de confirmation
+                M.toast({
+                    html: 'Votre compte a été créé avec succès',
+                    classes: 'green'
+                });
+                console.log(cred.user);
+            })
                 .catch((error) => {
                     console.error('Erreur lors de l\'enregistrement de l\'utilisateur', error);
                 });
@@ -43,3 +50,7 @@ signupForm.addEventListener('submit', function (event) {
             console.error('Erreur lors de la création de l\'utilisateur', error);
         });
 });
+
+
+// Logout
+
