@@ -10,7 +10,8 @@ import {
     getFirestore,
     collection,
     getDocs,
-    addDoc
+    addDoc,
+    onSnapshot
 } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
 // Initialize Firebase
@@ -27,24 +28,21 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-
 // Ajouter les guides a partir la base de données Firestore et la collection guides:
 // On va utiliser la fonction setupGuides() qui se trouve dans le fichier index.js
 
 
-
-// Listen to the auth state
+// Listen to the auth state change and update the UI accordingly    
 auth.onAuthStateChanged((user) => {
     if (user) {
         // User is signed in means the user exists in the database
-        console.log('After the Auth State Change the User is signed in:', user);
+        console.log('After the Auth State Change the User who is signed in:', user);
         // You can update the UI or perform other actions here
         const guidesRef = collection(db, 'guides');
-        getDocs(guidesRef)
-            .then((Snapshot) => {
-                setupGuides(Snapshot.docs); // Pass the documents to the setupGuides function
-                setupUI(user);
-            });
+        onSnapshot(guidesRef, (snapshot) => {
+            setupGuides(snapshot.docs); // Pass the documents to the setupGuides function
+            setupUI(user);
+        });
         
     } else { 
         // User is signed out
@@ -55,7 +53,30 @@ auth.onAuthStateChanged((user) => {
     }
  })
 
+// Create Guide 
+const createForm = document.getElementById('create-form');
+createForm.addEventListener('submit', function (event) {
+    event.preventDefault();
+    const title = createForm['title'].value;
+    const content = createForm['content'].value;
 
+    const guidesRef = collection(db, 'guides');
+    addDoc(guidesRef, {
+        title: title,
+        content: content
+    })
+        .then(() => {
+            // Close the modal
+            const modal = document.querySelector('#modal-create');
+            M.Modal.getInstance(modal).close();
+            // Reset the form
+            createForm.reset();                    
+            M.toast({ html: 'Guide créé avec_succès', classes: 'green' });// Afficher un message de succès
+        })
+        .catch((error) => {
+            console.error('Error adding document: ', error);
+        });
+ })
 
 
 // Sign up
