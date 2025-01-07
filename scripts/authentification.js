@@ -30,12 +30,6 @@ const db = getFirestore(app);
 
 // Ajouter les guides a partir la base de données Firestore et la collection guides:
 // On va utiliser la fonction setupGuides() qui se trouve dans le fichier index.js
-const guidesRef = collection(db, 'guides');
-getDocs(guidesRef)
-    .then((Snapshot) => {
-       setupGuides(Snapshot.docs);
-     })
-
 
 
 
@@ -45,10 +39,19 @@ auth.onAuthStateChanged((user) => {
         // User is signed in means the user exists in the database
         console.log('After the Auth State Change the User is signed in:', user);
         // You can update the UI or perform other actions here
-    } else {
+        const guidesRef = collection(db, 'guides');
+        getDocs(guidesRef)
+            .then((Snapshot) => {
+                setupGuides(Snapshot.docs); // Pass the documents to the setupGuides function
+                setupUI(user);
+            });
+        
+    } else { 
         // User is signed out
         console.log('User is signed out from the auth state change', user);
         // You can update the UI or perform other actions here
+        setupGuides([]);// vider la liste des guides si l'utilisateur est déconnecté
+        setupUI(null);
     }
  })
 
